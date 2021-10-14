@@ -11,7 +11,7 @@ import './App.css';
 function App() {
   const { isAuth } = useContext(AuthContext);
 
-  /**
+/**
  * renders the correct nodes based on the user state
  * 
  * @param {object} children contains the underlaying nodes

@@ -1,24 +1,37 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 
 function SignUp() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
-  const onSubmit = data => console.log(data);
-  console.log(errors);
+  const history = useHistory();
+  const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm();
+
+  const signUp = async (e) => {
+    console.log(e);
+
+    try {
+      await axios.post('http://localhost:3000/register', {
+        ...e
+      });
+      history.push('/signin');
+    } catch (e) {
+      setError("api", {
+        type: "manual",
+        message: "Invalid user or user already exists",
+      });
+    }
+  }
 
   return (
     <>
       <h1>Registreren</h1>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur atque consectetur, dolore eaque eligendi
-        harum, numquam, placeat quisquam repellat rerum suscipit ullam vitae. A ab ad assumenda, consequuntur deserunt
-        doloremque ea eveniet facere fuga illum in numquam quia reiciendis rem sequi tenetur veniam?</p>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input type="email" placeholder="Email" {...register("Email", { required: true, maxLength: 80 })} />
-        <input type="password" placeholder="Password" {...register("Password", { required: true, maxLength: 100 })} />
-        <input type="text" placeholder="Username" {...register("Username", {})} />
-
-        <input type="submit" />
+      <form onSubmit={handleSubmit(signUp)}>
+        <input type="email" placeholder="email" {...register("email", { required: true, maxLength: 80 })} />
+        <input type="password" placeholder="password" {...register("password", { required: true, maxLength: 100 })} />
+        <input type="text" placeholder="username" {...register("username", {})} />
+        {errors.api && <p>{errors.api.message}</p>}
+        <input type="submit" onClick={() => clearErrors('api')} />
       </form>
       <p>Heb je al een account? Je kunt je <Link to="/signin">hier</Link> inloggen.</p>
     </>

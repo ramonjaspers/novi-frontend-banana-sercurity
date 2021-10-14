@@ -6,13 +6,15 @@ import axios from 'axios';
 export const AuthContext = createContext({});
 
 export default function AuthContextProvider({ children }) {
+    // Set default states
     const [isAuth, toggleIsAuth] = useState({ isAuth: false, user: null, status: 'pending' });
     const history = useHistory();
 
     useEffect(() => {
-        // check if we got a token
+        // On mount check if a token is present
         const token = localStorage.getItem('token');
         if (token) {
+            // If a token is present decode this and request the user data
             const userData = jwtDecode(token);
             axios.get(`http://localhost:3000/600/users/${userData.sub}`, {
                 headers: {
@@ -20,6 +22,7 @@ export default function AuthContextProvider({ children }) {
                     Authorization: `Bearer ${token}`,
                 }
             }).then(({ data }) => {
+                // Set the recieved user data into the state
                 toggleIsAuth({
                     isAuth: true,
                     user: {
@@ -29,8 +32,10 @@ export default function AuthContextProvider({ children }) {
                     },
                     status: 'done'
                 })
-            });
+                // If something goes wrong it means the token is corrupted, unset the token and logout
+            }).catch(logout());
         } else {
+            // Set default props
             toggleIsAuth({ ...isAuth, status: 'done' })
         }
     }, []);
@@ -38,19 +43,23 @@ export default function AuthContextProvider({ children }) {
     function login(JWT) {
         // insert JWT into local storage, fetch user data and set auth = true
         localStorage.setItem('token', JWT);
+        //set user data
         const token = jwtDecode(JWT);
         toggleIsAuth({ user: { id: token.sub, email: token.email }, isAuth: true, status: 'done' });
         console.log('Gebruiker is ingelogd!');
+        // goto profile page
         history.push('/profile');
     }
 
     function logout() {
+        // Remove token and unset authentication
         localStorage.removeItem('token')
         toggleIsAuth({ ...isAuth, isAuth: false });
         console.log('Gebruiker is uitgelogd!');
+        // Goto homepage
         history.push('/');
     }
-
+    // Set ContextData which are being exported
     const contextData = {
         isAuth: isAuth.isAuth,
         user: isAuth.user,

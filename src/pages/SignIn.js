@@ -5,16 +5,20 @@ import { Link } from 'react-router-dom';
 import { AuthContext } from '../components/AuthContext';
 
 function SignIn() {
+  // Init hooks
   const { login } = useContext(AuthContext);
   const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm();
 
-  const signIn = async (e) => {
+  const signIn = async (data) => {
+    // try to login with the form data 
     try {
-      const response = await axios.post('http://localhost:3000/login', {
-        ...e
+      const {response} = await axios.post('http://localhost:3000/login', {
+        ...data
       });
       login(response.data.accessToken);
-    } catch (e) {
+    } catch (error) {
+      // Show user error and show real error in console
+      console.log(error);
       setError("api", {
         type: "manual",
         message: "Something went wrong, try again later",

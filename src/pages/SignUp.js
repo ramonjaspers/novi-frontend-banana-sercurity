@@ -4,18 +4,21 @@ import { useForm } from 'react-hook-form';
 import axios from 'axios';
 
 function SignUp() {
+  // init hooks
   const history = useHistory();
   const { register, handleSubmit, setError, clearErrors, formState: { errors } } = useForm();
 
-  const signUp = async (e) => {
-    console.log(e);
-
+  const signUp = async (data) => {
     try {
+      // Register with form data
       await axios.post('http://localhost:3000/register', {
-        ...e
+        ...data
       });
       history.push('/signin');
     } catch (e) {
+      console.log(e);
+            // Show user error and show real error in console
+
       setError("api", {
         type: "manual",
         message: "Invalid user or user already exists",
